@@ -62,7 +62,7 @@ namespace GodSharp.Mina
         /// </summary>
         private void SetOptions()
         {
-            if (string.IsNullOrWhiteSpace(options.ServiceName))
+            if (Extension.IsNullOrWhiteSpace(options.ServiceName))
             {
                 throw new ArgumentNullException(nameof(options.ServiceName));
             }
@@ -74,6 +74,7 @@ namespace GodSharp.Mina
             this.CanShutdown = options.CanShutdown;
             this.CanHandleSessionChangeEvent = options.CanHandleSessionChangeEvent;
             this.CanHandlePowerEvent = options.CanHandlePowerEvent;
+            this.ExitCode = options.ExitCode;
         }
 
         /// <summary>

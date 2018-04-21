@@ -41,7 +41,9 @@ namespace GodSharp.Mina
                 DisplayName = options.DisplayName,
                 Description = options.Description,
                 StartType = statrup.StartType,
-                DelayedAutoStart = statrup.DelayedAutoStart,
+#if !(NET20||NET35)
+                DelayedAutoStart = statrup.DelayedAutoStart, 
+#endif
                 ServicesDependedOn = statrup.ServicesDependedOn
             };
         }

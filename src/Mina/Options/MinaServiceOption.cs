@@ -76,5 +76,15 @@
         ///   <c>true</c> if this instance can handle session change event; otherwise, <c>false</c>.
         /// </value>
         public bool CanHandleSessionChangeEvent { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the exit code for the service.
+        /// </summary>
+        /// <value>
+        /// The exit code.
+        /// </value>
+        public int ExitCode { get; set; } = 0;
+
+
     }
 }

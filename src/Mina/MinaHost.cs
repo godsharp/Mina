@@ -10,7 +10,78 @@ namespace GodSharp.Mina
     public class MinaHost
     {
         /// <summary>
-        /// Runs the specified option.
+        /// Runs the service with specified option.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="option">The option.</param>
+        /// <param name="args">The arguments.</param>
+        /// <param name="installer">The installer.</param>
+        public static void Run<T>(MinaOption option, string[] args = null, MinaInstaller installer = null) where T : MinaService, new()
+        {
+            try
+            {
+                Run(option, new T(), args, installer);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Runs the service with specified option.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="option">The option.</param>
+        /// <param name="args">The arguments.</param>
+        /// <param name="installer">The installer.</param>
+        /// <exception cref="ArgumentNullException">option</exception>
+        public static void Run<T>(Action<MinaOption> option, string[] args = null, MinaInstaller installer = null) where T : MinaService, new()
+        {
+            try
+            {
+                if (option == null) throw new ArgumentNullException(nameof(option));
+
+                MinaOption _option = new MinaOption();
+
+                option.Invoke(_option);
+
+                Run(_option, new T(), args, installer);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Runs the service with specified option.
+        /// </summary>
+        /// <param name="option">The option.</param>
+        /// <param name="service">The service.</param>
+        /// <param name="args">The arguments.</param>
+        /// <param name="installer">The installer.</param>
+        /// <exception cref="ArgumentNullException">option</exception>
+        public static void Run(Action<MinaOption> option, MinaService service, string[] args = null, MinaInstaller installer = null)
+        {
+            try
+            {
+                if (option == null) throw new ArgumentNullException(nameof(option));
+
+                MinaOption _option = new MinaOption();
+
+                option.Invoke(_option);
+
+                Run(_option, service, args, installer);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// Runs the service with specified option.
         /// </summary>
         /// <param name="option">The option.</param>
         /// <param name="service">The service.</param>
@@ -29,10 +100,17 @@ namespace GodSharp.Mina
                 // parameter check
                 if (option == null) throw new ArgumentNullException(nameof(option));
                 if (service == null) throw new ArgumentNullException(nameof(service));
-
-                if (string.IsNullOrWhiteSpace(option.Service.ServiceName)) throw new ArgumentNullException(nameof(option.Service.ServiceName));
-                if (string.IsNullOrWhiteSpace(option.Service.DisplayName)) option.Service.DisplayName = option.Service.ServiceName;
-
+                
+                if (Extension.IsNullOrWhiteSpace(option.Service.ServiceName))
+                {
+                    throw new ArgumentNullException(nameof(option.Service.ServiceName));
+                }
+                
+                if (Extension.IsNullOrWhiteSpace(option.Service.ServiceName))
+                {
+                    option.Service.DisplayName = option.Service.ServiceName;
+                }
+                
                 // service initialize
                 service.OnInitialize();
 
