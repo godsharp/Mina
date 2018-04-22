@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.ServiceProcess;
 
@@ -29,6 +30,27 @@ namespace GodSharp.Mina
         public static bool Start(string serviceName, bool throwException = true, int timeout = 50000)
         {
             return Action(serviceName, ServiceControllerStatus.Running, (sc) => sc.Start(), timeout, throwException);
+        }
+
+        /// <summary>
+        /// Restarts the specified service name.
+        /// </summary>
+        /// <param name="serviceName">Name of the service.</param>
+        /// <param name="throwException">if set to <c>true</c> [throw exception].</param>
+        /// <param name="timeout">The timeout.</param>
+        /// <returns></returns>
+        public static bool ReStart(string serviceName, bool throwException = true, int timeout = 50000)
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            bool ret = Stop(serviceName, throwException, timeout);
+
+            stopwatch.Stop();
+
+            int span = timeout - (int)stopwatch.Elapsed.TotalMilliseconds;
+
+            return ret ? Start(serviceName, throwException, span > 100 ? span : 100) : false;
         }
 
         /// <summary>
@@ -65,6 +87,19 @@ namespace GodSharp.Mina
         public static bool Continue(string serviceName, bool throwException = true, int timeout = 50000)
         {
             return Action(serviceName, ServiceControllerStatus.Running, (sc) => sc.Continue(), timeout, throwException);
+        }
+
+        /// <summary>
+        /// Commands the specified service name.
+        /// </summary>
+        /// <param name="serviceName">Name of the service.</param>
+        /// <param name="command">The command.</param>
+        /// <param name="throwException">if set to <c>true</c> [throw exception].</param>
+        /// <param name="timeout">The timeout.</param>
+        /// <returns></returns>
+        public static bool Command(string serviceName,int command, bool throwException = true, int timeout = 50000)
+        {
+            return Action(serviceName, ServiceControllerStatus.Running, (sc) => sc.ExecuteCommand(command), timeout, throwException);
         }
 
         /// <summary>

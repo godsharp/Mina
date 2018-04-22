@@ -116,11 +116,78 @@ namespace GodSharp.Mina
 
                 bool install = false;
                 bool uninstall = false;
+                bool start = false;
+                bool stop = false;
+                bool restart = false;
+                bool pause = false;
+                bool continuee = false;
+                bool command = false;
+                int cmd = -1;
 
                 if (args?.Length > 0)
                 {
                     install = args.Contains("-i") || args.Contains("/i") || args.Contains("-install") || args.Contains("/install");
                     uninstall = args.Contains("-u") || args.Contains("/u") || args.Contains("-uninstall") || args.Contains("/uninstall");
+
+                    start = args.Contains("-start") || args.Contains("/start");
+                    stop = args.Contains("-stop") || args.Contains("/stop");
+                    restart = args.Contains("-r") || args.Contains("/r") || args.Contains("-restart") || args.Contains("/restart");
+                    
+                    pause = args.Contains("-p") || args.Contains("/p") || args.Contains("-pause") || args.Contains("/pause");
+                    continuee = args.Contains("-c") || args.Contains("/c") || args.Contains("-continue") || args.Contains("/continue");
+
+                    command = args.Contains("-cmd") || args.Contains("/cmd") || args.Contains("-commnd") || args.Contains("/commnd");
+
+                    if (command)
+                    {
+                        string[] cmds = new string[] { "-cmd", "/cmd", "-commnd", "/commnd" };
+                        foreach (var item in cmds)
+                        {
+                            int index = Array.IndexOf(args, item);
+                            index++;
+
+                            if (index > 0 && args.Length >= index)
+                            {
+                                bool ret = int.TryParse(args[index], out cmd);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (start)
+                {
+                    ServiceControllerHelper.Start(option.Service.ServiceName);
+                    return;
+                }
+
+                if (stop)
+                {
+                    ServiceControllerHelper.Stop(option.Service.ServiceName);
+                    return;
+                }
+
+                if (restart)
+                {
+                    ServiceControllerHelper.ReStart(option.Service.ServiceName);
+                    return;
+                }
+
+                if (pause)
+                {
+                    ServiceControllerHelper.Pause(option.Service.ServiceName);
+                    return;
+                }
+                if (continuee)
+                {
+                    ServiceControllerHelper.Continue(option.Service.ServiceName);
+                    return;
+                }
+
+                if (command)
+                {
+                    if (cmd != -1) ServiceControllerHelper.Command(option.Service.ServiceName, cmd);
+                    return;
                 }
 
                 // initialize installer
