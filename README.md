@@ -77,8 +77,8 @@ The example service name is `sample.exe`.
 
 Syntax:
 ```
-servic.exe -h[elp]
-servic.exe /h[elp]
+service.exe -h[elp]
+service.exe /h[elp]
 ```
 
 Sample:
@@ -93,8 +93,8 @@ sample.exe /help
 
 Syntax:
 ```
-servic.exe -i[nstall]
-servic.exe /i[nstall]
+service.exe -i[nstall]
+service.exe /i[nstall]
 ```
 
 Sample:
@@ -109,8 +109,8 @@ sample.exe /install
 
 Syntax:
 ```
-servic.exe -u[ninstall]
-servic.exe /u[ninstall]
+service.exe -u[ninstall]
+service.exe /u[ninstall]
 ```
 
 Sample:
@@ -125,8 +125,8 @@ sample.exe /uninstall
 
 Syntax:
 ```
-servic.exe -start
-servic.exe /start
+service.exe -start
+service.exe /start
 ```
 
 Sample:
@@ -139,8 +139,8 @@ sample.exe /start
 
 Syntax:
 ```
-servic.exe -r[estart]
-servic.exe /r[estart]
+service.exe -r[estart]
+service.exe /r[estart]
 ```
 
 Sample:
@@ -155,8 +155,8 @@ sample.exe /restart
 
 Syntax:
 ```
-servic.exe -p[ause]
-servic.exe /p[ause]
+service.exe -p[ause]
+service.exe /p[ause]
 ```
 
 Sample:
@@ -171,8 +171,8 @@ sample.exe /pause
 
 Syntax:
 ```
-servic.exe -c[ontinue]
-servic.exe /c[ontinue]
+service.exe -c[ontinue]
+service.exe /c[ontinue]
 ```
 
 Sample:
@@ -187,8 +187,8 @@ sample.exe /continue
 
 Syntax:
 ```
-servic.exe -stop
-servic.exe /stop
+service.exe -stop
+service.exe /stop
 ```
 
 Sample:
@@ -201,8 +201,8 @@ sample.exe /stop
 
 Syntax:
 ```
-servic.exe -cmd|command command-parameter
-servic.exe /cmd|command command-parameter
+service.exe -cmd|command command-parameter
+service.exe /cmd|command command-parameter
 ```
 
 `command-parameter` is `int` type.
