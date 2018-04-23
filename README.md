@@ -22,7 +22,7 @@ A simple window service library for .net .
 
 You can install Mina via NuGet:
 ```
-PM> Install-Package Mina
+PM> Install-Package GodSharp.Mina
 ```
 
 ## Use
@@ -72,6 +72,22 @@ MinaHost.Run<MinaSampleService>((o)=>{},args);
 The service `install/uninstall`, `start/restart/pause/continue/stop`, `command`.
 
 The example service name is `sample.exe`.
+
+### Help
+
+Syntax:
+```
+servic.exe -h[elp]
+servic.exe /h[elp]
+```
+
+Sample:
+```
+sample.exe -h
+sample.exe -help
+sample.exe /h
+sample.exe /help
+```
 
 ### Install
 

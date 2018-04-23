@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections;
 using System.Configuration.Install;
-using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
 
@@ -17,6 +18,7 @@ namespace GodSharp.Mina
         /// </summary>
         private TransactedInstaller transactedInstaller;
         private string path;
+        MinaOption option;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MinaServiceInstaller"/> class.
@@ -24,6 +26,7 @@ namespace GodSharp.Mina
         /// <param name="options">The options.</param>
         public MinaServiceInstaller(MinaOption options)
         {
+            option = options;
             Build(options);
         }
 
@@ -75,32 +78,73 @@ namespace GodSharp.Mina
 
             Assembly assembly = Assembly.GetEntryAssembly();
 
-            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
-
             path = assembly.Location;
         }
-        
+
         /// <summary>
         /// Installs this instance.
         /// </summary>
-        public void Install()
+        /// <returns></returns>
+        public bool Install(string parameter=null)
         {
-            this.transactedInstaller.Context = new InstallContext("Install.log", null);
-            this.transactedInstaller.Context.Parameters["assemblypath"] = path;
+            try
+            {
+                this.transactedInstaller.Context = new InstallContext("Install.log", null);
 
-            Hashtable hashtable = new Hashtable();
-            this.transactedInstaller.Install(hashtable);
+                string ImagePath = path;
+
+                if (!Extension.IsNullOrWhiteSpace(parameter)) ImagePath = $"\"{path}\" {parameter}";
+
+                this.transactedInstaller.Context.Parameters["assemblypath"] = ImagePath;
+
+                Hashtable hashtable = new Hashtable();
+                this.transactedInstaller.Install(hashtable);
+
+                using (RegistryKey services = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services"))
+                {
+                    bool ret = services.GetSubKeyNames().Contains(option.Service.ServiceName);
+
+                    //if (ret)
+                    //{
+                    //    using (RegistryKey service = Registry.LocalMachine.OpenSubKey(option.Service.ServiceName))
+                    //    {
+                    //        service.SetValue("ImagePath",);
+                    //    }
+                    //}
+
+                    return ret;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         /// <summary>
         /// Uninstalls this instance.
         /// </summary>
-        public void Uninstall()
+        /// <returns></returns>
+        public bool Uninstall()
         {
-            this.transactedInstaller.Context = new InstallContext("Install.log", null);
-            this.transactedInstaller.Context.Parameters["assemblypath"] = path;
-            
-            this.transactedInstaller.Uninstall(null);
+            try
+            {
+                this.transactedInstaller.Context = new InstallContext("Install.log", null);
+                this.transactedInstaller.Context.Parameters["assemblypath"] = path;
+
+                this.transactedInstaller.Uninstall(null);
+
+                using (RegistryKey services = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services"))
+                {
+                    if (services.GetSubKeyNames().Contains(option.Service.ServiceName)) services.DeleteSubKey(option.Service.ServiceName);
+
+                    return !services.GetSubKeyNames().Contains(option.Service.ServiceName);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         #region IDisposable Support

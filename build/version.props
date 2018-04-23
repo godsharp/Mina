@@ -1,13 +1,13 @@
 ﻿<Project>
   <PropertyGroup Condition="'$(AssemblyName)'=='GodSharp.Mina'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.1-preview01</Version>
+    <Version>0.0.1-preview1</Version>
     <FileVersion>0.0.1</FileVersion>
     <DocumentationFile>$(SolutionDir)\output\$(AssemblyName)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(AssemblyName)'=='Mina.NetCoreConsoleSample'">
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Version>0.0.1-preview01</Version>
+    <Version>0.0.1-preview1</Version>
     <FileVersion>0.0.1</FileVersion>
     <DocumentationFile>$(SolutionDir)\output\$(AssemblyName)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>

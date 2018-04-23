@@ -17,7 +17,7 @@ namespace GodSharp.Mina
         /// <returns></returns>
         public static bool Exist(string serviceName)
         {
-            return ServiceController.GetServices().FirstOrDefault(f => f.ServiceName == serviceName) == null;
+            return ServiceController.GetServices().FirstOrDefault(f => f.ServiceName == serviceName) != null;
         }
 
         /// <summary>

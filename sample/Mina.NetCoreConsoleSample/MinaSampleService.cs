@@ -13,6 +13,14 @@ namespace Mina.NetCoreConsoleSample
 
         public override void OnStart(string[] args)
         {
+            if (args?.Length > 0 == true)
+            {
+                foreach (var item in args)
+                {
+                    File.AppendAllText(file, string.Join(",", args));
+                }
+            }
+
             index = 0;
             file = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tmp.log");
 

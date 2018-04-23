@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.ServiceProcess;
+using System.Text;
 
 namespace GodSharp.Mina
 {
@@ -114,6 +117,7 @@ namespace GodSharp.Mina
                 // service initialize
                 service.OnInitialize();
 
+                bool help = false;
                 bool install = false;
                 bool uninstall = false;
                 bool start = false;
@@ -124,69 +128,86 @@ namespace GodSharp.Mina
                 bool command = false;
                 int cmd = -1;
 
+                string parameter = null;
+
                 if (args?.Length > 0)
                 {
-                    install = args.Contains("-i") || args.Contains("/i") || args.Contains("-install") || args.Contains("/install");
-                    uninstall = args.Contains("-u") || args.Contains("/u") || args.Contains("-uninstall") || args.Contains("/uninstall");
+                    int length = args.Length;
+                    string action = args[0];
 
-                    start = args.Contains("-start") || args.Contains("/start");
-                    stop = args.Contains("-stop") || args.Contains("/stop");
-                    restart = args.Contains("-r") || args.Contains("/r") || args.Contains("-restart") || args.Contains("/restart");
-                    
-                    pause = args.Contains("-p") || args.Contains("/p") || args.Contains("-pause") || args.Contains("/pause");
-                    continuee = args.Contains("-c") || args.Contains("/c") || args.Contains("-continue") || args.Contains("/continue");
+                    help = action.Equals("-h") || action.Equals("/h") || action.Equals("-help") || action.Equals("/help");
 
-                    command = args.Contains("-cmd") || args.Contains("/cmd") || args.Contains("-commnd") || args.Contains("/commnd");
+                    install = action.Equals("-i") || action.Equals("/i") || action.Equals("-install") || action.Equals("/install");
 
-                    if (command)
+                    if (install && length > 1)
                     {
-                        string[] cmds = new string[] { "-cmd", "/cmd", "-commnd", "/commnd" };
-                        foreach (var item in cmds)
+                        for (int i = 1; i < length; i++)
                         {
-                            int index = Array.IndexOf(args, item);
-                            index++;
-
-                            if (index > 0 && args.Length >= index)
-                            {
-                                bool ret = int.TryParse(args[index], out cmd);
-                                break;
-                            }
+                            if (!Extension.IsNullOrWhiteSpace(args[i])) parameter += $"{args[i]} ";
                         }
+
+                        parameter = parameter.Trim();
                     }
+
+                    uninstall = action.Equals("-u") || action.Equals("/u") || action.Equals("-uninstall") || action.Equals("/uninstall");
+
+                    start = action.Equals("-start") || action.Equals("/start");
+                    stop = action.Equals("-stop") || action.Equals("/stop");
+                    restart = action.Equals("-r") || action.Equals("/r") || action.Equals("-restart") || action.Equals("/restart");
+                    
+                    pause = action.Equals("-p") || action.Equals("/p") || action.Equals("-pause") || action.Equals("/pause");
+                    continuee = action.Equals("-c") || action.Equals("/c") || action.Equals("-continue") || action.Equals("/continue");
+
+                    command = action.Equals("-cmd") || action.Equals("/cmd") || action.Equals("-commnd") || action.Equals("/commnd");
+
+                    if (command && length > 1)
+                    {
+                        bool ret = int.TryParse(args[1], out cmd);
+                        command = ret && cmd != -1;
+
+                        if (!command) return;
+                    }
+                }
+                
+                if (help)
+                {
+                    PrintHelp();
+                    return;
                 }
 
                 if (start)
                 {
-                    ServiceControllerHelper.Start(option.Service.ServiceName);
+                    ExecuteActionCheckServiceExist(option.Service.ServiceName, () => ServiceControllerHelper.Start(option.Service.ServiceName));
                     return;
                 }
 
                 if (stop)
                 {
-                    ServiceControllerHelper.Stop(option.Service.ServiceName);
+                    ExecuteActionCheckServiceExist(option.Service.ServiceName, () => ServiceControllerHelper.Stop(option.Service.ServiceName));
                     return;
                 }
 
                 if (restart)
                 {
-                    ServiceControllerHelper.ReStart(option.Service.ServiceName);
+                    ExecuteActionCheckServiceExist(option.Service.ServiceName, () => ServiceControllerHelper.ReStart(option.Service.ServiceName));
                     return;
                 }
 
                 if (pause)
                 {
-                    ServiceControllerHelper.Pause(option.Service.ServiceName);
+                    ExecuteActionCheckServiceExist(option.Service.ServiceName, () => ServiceControllerHelper.Pause(option.Service.ServiceName));
                     return;
                 }
+
                 if (continuee)
                 {
-                    ServiceControllerHelper.Continue(option.Service.ServiceName);
+                    ExecuteActionCheckServiceExist(option.Service.ServiceName, () => ServiceControllerHelper.Continue(option.Service.ServiceName));
                     return;
                 }
 
                 if (command)
                 {
-                    if (cmd != -1) ServiceControllerHelper.Command(option.Service.ServiceName, cmd);
+                    ServiceControllerHelper.Command(option.Service.ServiceName, cmd);
                     return;
                 }
 
@@ -203,7 +224,7 @@ namespace GodSharp.Mina
                 {
                     installer?.OnBeforeInstall();
 
-                    msi.Install();
+                    msi.Install(parameter);
                     msi.Dispose();
 
                     installer?.OnAfterInstall();
@@ -225,14 +246,14 @@ namespace GodSharp.Mina
                     return;
                 }
 
-                if (!ServiceControllerHelper.Exist(option.Service.ServiceName)) throw new InvalidOperationException($"The service [{option.Service.ServiceName}] not install.");
+                ExecuteActionCheckServiceExist(option.Service.ServiceName, null);
 
                 // run service
                 ServiceBase[] ServicesToRun;
 
                 ServicesToRun = new ServiceBase[]
                 {
-                new MinaServiceBase(service,option.Service)
+                    new MinaServiceBase(service,option.Service)
                 };
 
                 ServiceBase.Run(ServicesToRun);
@@ -241,6 +262,41 @@ namespace GodSharp.Mina
             {
                 throw ex;
             }
+        }
+
+        private static void ExecuteActionCheckServiceExist(string serviceName, Action action)
+        {
+            if (!ServiceControllerHelper.Exist(serviceName)) throw new InvalidOperationException($"The service [{serviceName}] not install.");
+
+            action?.Invoke();
+        }
+
+        private static void PrintHelp()
+        {
+            StringBuilder builder = new StringBuilder();
+            Assembly assembly = Assembly.GetEntryAssembly();
+
+            builder.AppendLine("Mina service help infomation");
+
+            FileVersionInfo version = Extension.GetFileVersion(Assembly.GetExecutingAssembly().Location);
+            builder.AppendLine($"Mina file version : {version.FileVersion}, product version : {version.ProductVersion}.");
+
+            version = Extension.GetFileVersion();
+            builder.AppendLine($"Service file version : {version.FileVersion}, product version : {version.ProductVersion}.");
+            builder.AppendLine("Syntax");
+            builder.AppendLine("\tSampleService.exe option");
+            builder.AppendLine("Options");
+            builder.AppendLine("\t-h[elp] print help information");
+            builder.AppendLine("\t-i[nstall] [startup-parameter] install service with startup parameter when startup-parameter is not null");
+            builder.AppendLine("\t-u[install] uinstall service");
+            builder.AppendLine("\t-start start the service");
+            builder.AppendLine("\t-r[estart] restart the service");
+            builder.AppendLine("\t-p[ause] pause the service");
+            builder.AppendLine("\t-c[ontinue] continue the service");
+            builder.AppendLine("\t-stop stop the service");
+            builder.AppendLine("\t-command[cmd] custom-command-parameter execute custom command with custom-command-parameter,custom-command-parameter must be 1 to 128");
+
+            Console.WriteLine(builder.ToString());
         }
     }
 }

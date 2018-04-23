@@ -1,4 +1,6 @@
-﻿namespace GodSharp.Mina
+﻿using System.Diagnostics;
+
+namespace GodSharp.Mina
 {
     internal static class Extension
     {
@@ -9,6 +11,18 @@
 #else
             return string.IsNullOrWhiteSpace(value);
 #endif
+        }
+
+        public static string GetFileVersionString(string file = null)
+        {
+            return GetFileVersion(file).ToString();
+        }
+
+        public static FileVersionInfo GetFileVersion(string file = null)
+        {
+            if (Extension.IsNullOrWhiteSpace(file)) file = System.Reflection.Assembly.GetEntryAssembly().Location;
+
+            return FileVersionInfo.GetVersionInfo(file);
         }
     }
 }
